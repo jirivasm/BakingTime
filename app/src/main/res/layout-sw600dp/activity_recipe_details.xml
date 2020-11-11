@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+<LinearLayout
+    android:id="@+id/two_pane_linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/master_list_fragment"
+        android:name="com.example.bakingtime.RecipeDetailsMasterListFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <View
+        android:layout_width="3dp"
+        android:layout_height="match_parent" />
+
+
+    <FrameLayout
+        android:id="@+id/step_description_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2" />
+</LinearLayout>
+    <TextView android:id="@+id/select_step_text_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:text="@string/selectStep"/>
+</RelativeLayout>

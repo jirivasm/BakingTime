@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Baking Time</string>
+    <string name="something_went_wrong">Something went wrong</string>
+
+    <string name="recipeSelected">recipeSelected</string>
+    <string name="stepSelected">stepSelected</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="myRecipes">myRecipes</string>
+    <string name="Ingredients_label_text">Ingredients</string>
+    <string name="preferencesRecipeSelected">preferencesRecipeSelected</string>
+    <string name="empty_view_text">No Recipe Selected</string>
+    <string name="myPrefs">myPrefs</string>
+    <string name="of"> of </string>
+    <string name="selectStep">Select a Step to view Details</string>
+</resources>
