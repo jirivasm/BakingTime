@@ -32,7 +32,9 @@ import com.google.gson.Gson;
 
 public class StepsDetailFragment extends Fragment {
 
+    //static finals to save instances of the player and the steps we selected drom the recipe we selected
     private static final String KEY_PLAYER_POSITION = "playerPosition";
+    private static final String KEY_PLAYER_STATE = "playerState";
     private static final String KEY_STEP_ID = "stepID";
 
     Steps mStepSelected;
@@ -45,6 +47,7 @@ public class StepsDetailFragment extends Fragment {
     SimpleExoPlayer mExoPlayer;
     PlayerView mPlayerView;
     Long mExoPlayerPosition = 0L;
+    boolean mPLayerState;
 
 
     public StepsDetailFragment() {
@@ -56,10 +59,14 @@ public class StepsDetailFragment extends Fragment {
 
         final View rootView = inflater.inflate(R.layout.steps_detail_fragment, container, false);
 
+        //first we get the recipe
         Gson gson = new Gson();
         mRecipeSelected = gson.fromJson(getActivity().getIntent().getStringExtra(getResources().getString(R.string.recipeSelected)), Recipe.class);
+
         if (savedInstanceState != null) {
+            //if there is something saved we retrieve it and save it.
             mExoPlayerPosition = savedInstanceState.getLong(KEY_PLAYER_POSITION);
+            mPLayerState = savedInstanceState.getBoolean(KEY_PLAYER_STATE);
             mStepID = savedInstanceState.getInt(KEY_STEP_ID);
             mStepSelected = mRecipeSelected.getSteps().get(mStepID);
         } else {
@@ -72,12 +79,16 @@ public class StepsDetailFragment extends Fragment {
         }
 
 
+        //
         final TextView stepDescription = rootView.findViewById(R.id.steps_long_description_detail);
         stepDescription.setText(mStepSelected.getDescription());
 
+        //setting the views
         mNextStepButton = rootView.findViewById(R.id.next_step_button);
         mPrevStepButton = rootView.findViewById(R.id.prev_step_button);
         mPlayerView = rootView.findViewById(R.id.exoplayer_view);
+        //don't want to display these buttons on exoplayer since the videos are so short
+
         mPlayerView.setShowPreviousButton(false);
         mPlayerView.setShowNextButton(false);
         mPlayerView.setShowFastForwardButton(false);
@@ -87,6 +98,7 @@ public class StepsDetailFragment extends Fragment {
         SetButtonsVisibility();
 
 
+        //next and previous buttons listeners getting the crrect steps to show details
         mNextStepButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,6 +144,7 @@ public class StepsDetailFragment extends Fragment {
 
 
     private void SetButtonsVisibility() {
+        //for when we are on the first or last step of the recipes
         if (mStepID < mRecipeSelected.getSteps().size() - 1)
             mNextStepButton.setVisibility(View.VISIBLE);
         else
@@ -146,6 +159,7 @@ public class StepsDetailFragment extends Fragment {
 
         mPlayerView.setVisibility(View.VISIBLE);
         Uri u;
+        //getting the video either from the videoURL or the ThumbnailURL
         if (!mStepSelected.getVideoURL().isEmpty())
             u = Uri.parse(mStepSelected.getVideoURL());
         else if (!mStepSelected.getThumbnailURL().isEmpty())
@@ -155,10 +169,12 @@ public class StepsDetailFragment extends Fragment {
             return;
         }
 
+        //Loading exoPlayer
         TrackSelector trackSelector = new DefaultTrackSelector();
         LoadControl loadControl = new DefaultLoadControl();
         mExoPlayer = ExoPlayerFactory.newSimpleInstance(getContext(), trackSelector, loadControl);
         mPlayerView.setPlayer(mExoPlayer);
+
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
@@ -170,7 +186,9 @@ public class StepsDetailFragment extends Fragment {
         MediaSource mediaSource = new ExtractorMediaSource(u, new DefaultDataSourceFactory(
                 getContext(), userAgent), new DefaultExtractorsFactory(), null, null);
 
+
         mExoPlayer.prepare(mediaSource);
+        //if the screen is rotated play the video where it was
         mExoPlayer.seekTo(mExoPlayerPosition);
         mExoPlayer.setAudioAttributes(audioAttributes, true);
         mExoPlayer.setPlayWhenReady(true);
@@ -179,18 +197,30 @@ public class StepsDetailFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
 
+        //saving the state, and position of the exoplayer as well as the stepID we are viewing
         outState.putLong(KEY_PLAYER_POSITION, mExoPlayerPosition);
         outState.putInt(KEY_STEP_ID, mStepID);
+        outState.putBoolean(KEY_PLAYER_STATE,mExoPlayer.getPlayWhenReady());
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if (Util.SDK_INT <= 23) {
+            if (mExoPlayer != null) {
+                mExoPlayerPosition = mExoPlayer.getContentPosition();
+                mPLayerState = mExoPlayer.getPlayWhenReady();
+                releasePlayer();
+            }
+        }
+    }
 
-        if (mExoPlayer != null) {
-            mExoPlayerPosition = mExoPlayer.getContentPosition();
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT <= 23)
+        {
             releasePlayer();
-            mStepSelected = null;
         }
     }
 

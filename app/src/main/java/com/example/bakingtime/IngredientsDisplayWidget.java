@@ -54,6 +54,7 @@ public class IngredientsDisplayWidget extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.ingredients_display_widget);
 
 
+        //updating the widget when the recipe changes and fill the info on the GridWidget Service
         Intent intent = new Intent(context, GridWidgetService.class);
         views.setRemoteAdapter(R.id.ingredients_grid_view, intent);
 
@@ -62,6 +63,7 @@ public class IngredientsDisplayWidget extends AppWidgetProvider {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         views.setPendingIntentTemplate(R.id.ingredients_grid_view, pendingIntent);
 
+        //For when there is no recipe selected
         views.setEmptyView(R.id.ingredients_grid_view, R.id.empty_view);
 
         return views;

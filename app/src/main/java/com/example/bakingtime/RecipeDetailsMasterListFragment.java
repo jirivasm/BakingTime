@@ -84,21 +84,27 @@ public class RecipeDetailsMasterListFragment extends Fragment
 
         Gson gson = new Gson();
 
+        //getting the recipe selected from the MainActivity
         mSelectedRecipe = mGson.fromJson(getActivity().getIntent().getStringExtra(getResources().getString(R.string.recipeSelected)), Recipe.class);
 
+        //initializing the shared preferences to save the recipe selected
         SharedPreferences mSharedPreferences = this.getActivity().getSharedPreferences(getString(R.string.myPrefs), MODE_PRIVATE);
 
         if (mSelectedRecipe == null) {
+            //the recipe selected can be null if we open this activity trough the widget
+            // so we get the recipe selected from the shared preferences
             String recipesList = mSharedPreferences.getString(getString(R.string.preferencesRecipeSelected), "");
             mSelectedRecipe = gson.fromJson(recipesList, Recipe.class);
         }
         else{
+            //if the recipe is not null we save it on the shared preferences so we can use it on the widget.
             String recipeString = gson.toJson(mSelectedRecipe);
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString(getString(R.string.preferencesRecipeSelected), recipeString);
             editor.apply();
         }
 
+        //Basic adapter and recycle view stuff
         LinearLayoutManager IngredientsLinearLayoutManager = new LinearLayoutManager(rootView.getContext(), RecyclerView.VERTICAL, false);
         LinearLayoutManager StepsLinearLayoutManager = new LinearLayoutManager(rootView.getContext(), RecyclerView.VERTICAL, false);
 

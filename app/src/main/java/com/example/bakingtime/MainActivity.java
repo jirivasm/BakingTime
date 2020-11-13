@@ -29,11 +29,11 @@ public class MainActivity extends AppCompatActivity
         implements RecipeAdapter.RecipeAdapterOnClickHandler, Serializable {
 
     private RecipeAdapter mRecipeAdapter;
-
     private RecyclerView mRecyclerView;
-
     private SharedPreferences mSharedPreferences;
     Gson mGson = new Gson();
+
+    public static boolean backgroundWorkDone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,11 +63,15 @@ public class MainActivity extends AppCompatActivity
     private void loadRecipeData() {
         if(mSharedPreferences.contains(getResources().getString(R.string.myRecipes)))
         {
+            //if the recipes are already saved no need to fetch them from the internet
+            //get them form shared preferences that are saved as a String with JSON
             Gson gson = new Gson();
             String recipesList = mSharedPreferences.getString(getResources().getString(R.string.myRecipes),"");
             Type type = new TypeToken<List<Recipe>>(){}.getType();
             List<Recipe> recipes = gson.fromJson(recipesList,type);
             mRecipeAdapter.setRecipeData(recipes);
+            //for test purposes
+            backgroundWorkDone = true;
         }
         else
             new FetchRecipeTask().execute();
@@ -76,9 +80,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(Recipe recipeSelected) {
 
-
-
-
+        //getting the recipe selected putting it on gson to pss it to the RecipeSelected class
         Gson gson = new Gson();
         String object = gson.toJson(recipeSelected);
         Intent intent = new Intent(this, RecipeDetails.class);
@@ -102,11 +104,16 @@ public class MainActivity extends AppCompatActivity
             ProgressBar pb = findViewById(R.id.pb_loading_indicator);
             pb.setVisibility(View.GONE);
             if (recipes != null) {
+                //getting the recipe and save it on shared preferences
+                // so there is no need to connect to the web again once the recipes are downloaded
                 String recipeString = mGson.toJson(recipes);
                 SharedPreferences.Editor editor = mSharedPreferences.edit();
                 editor.putString(getResources().getString(R.string.myRecipes),recipeString);
                 editor.commit();
+                //setting the adapter
                 mRecipeAdapter.setRecipeData(recipes);
+                //for testing purposes
+                backgroundWorkDone = true;
             }
         }
 
